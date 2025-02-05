@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -20,58 +20,38 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {formatToVND} from "@/lib/utils";
 
-// Sample data - in a real app, this would come from your API
-const products = [
-  { 
-    id: 1, 
-    name: 'Ballpoint Pen', 
-    price: 1.99, 
-    stock: 100, 
-    category: 'Writing Instruments',
-    status: 'In Stock',
-    sku: 'PEN-001',
-  },
-  { 
-    id: 2, 
-    name: 'Fountain Pen', 
-    price: 24.99, 
-    stock: 50, 
-    category: 'Writing Instruments',
-    status: 'Low Stock',
-    sku: 'PEN-002',
-  },
-  { 
-    id: 3, 
-    name: 'Spiral Notebook', 
-    price: 4.99, 
-    stock: 200, 
-    category: 'Paper Products',
-    status: 'In Stock',
-    sku: 'NB-001',
-  },
-  { 
-    id: 4, 
-    name: 'Hardcover Journal', 
-    price: 12.99, 
-    stock: 5, 
-    category: 'Paper Products',
-    status: 'Critical Stock',
-    sku: 'NB-002',
-  },
-]
+type Product = {
+  id: number
+  name: string
+  price: number
+  status: string | null
+  categoryId: number | null
+  stock: string
+  quantity: number
+  category: {
+    catName: string
+  } | null
+}
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([])
   const [search, setSearch] = useState('')
 
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => setProducts(data))
+  }, [])
+
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(search.toLowerCase()) ||
-    product.sku.toLowerCase().includes(search.toLowerCase())
+    product.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  const getStockStatus = (stock: number): "destructive" | "default" | "outline" | "secondary" => {
-    if (stock <= 5) return "destructive"
-    if (stock <= 20) return "secondary"
+  const getStockStatus = (stock: string): "destructive" | "default" | "outline" | "secondary" => {
+    if (stock === 'OUT_OF_STOCK') return "destructive"
+    if (stock === 'RUNNING_LOW') return "secondary"
     return "default"
   }
 
@@ -104,11 +84,10 @@ export default function ProductsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>SKU</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
+                <TableHead>Quantity</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -116,14 +95,13 @@ export default function ProductsPage() {
             <TableBody>
               {filteredProducts.map((product) => (
                 <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.sku}</TableCell>
                   <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>${product.price.toFixed(2)}</TableCell>
-                  <TableCell>{product.stock}</TableCell>
+                  <TableCell>{product.category?.catName || 'Uncategorized'}</TableCell>
+                  <TableCell>{formatToVND(product.price)}</TableCell>
+                  <TableCell>{product.quantity}</TableCell>
                   <TableCell>
                     <Badge variant={getStockStatus(product.stock)}>
-                      {product.status}
+                      {product.stock}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -143,4 +121,3 @@ export default function ProductsPage() {
     </div>
   )
 }
-
