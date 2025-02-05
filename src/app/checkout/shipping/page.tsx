@@ -6,15 +6,21 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function ShippingPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     fullName: "",
-    address: "",
+    email: "",
+    gender: "",
+    dateOfBirth: "",
+    street: "",
+    ward: "",
+    district: "",
     city: "",
     country: "",
-    postalCode: "",
+    apartment: "",
   })
   const [paymentMethod, setPaymentMethod] = useState("visa")
 
@@ -22,21 +28,41 @@ export default function ShippingPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Shipping info:", formData);
-    console.log("Payment method:", paymentMethod);
-  
+  const handleGenderChange = (value: string) => {
+    setFormData({ ...formData, gender: value })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Store user details for order creation
+    localStorage.setItem('userDetails', JSON.stringify(formData))
+
     if (paymentMethod === "cod") {
-      // For COD, skip the payment page
-      router.push("/checkout/confirmation");
+      // Create order with COD payment
+      const cartItems = JSON.parse(localStorage.getItem('cart') || '[]')
+      const total = cartItems.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0)
+
+      await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartItems,
+          userDetails: formData,
+          paymentDetails: {
+            amount: total,
+            method: 'COD',
+            status: 'PENDING'
+          }
+        })
+      })
+      router.push("/checkout/confirmation")
     } else if (paymentMethod === "VNPAY") {
-      // Redirect to the payment page with the method as a query parameter
-      router.push("/checkout/payment?method=VNPAY");
+      router.push("/checkout/payment?method=VNPAY")
     } else {
-      router.push("/checkout/payment?method=visa"); // Redirect for other payment methods
+      router.push("/checkout/payment?method=visa")
     }
-  };
+  }
 
   return (
     <div className="container mx-auto py-10">
@@ -47,8 +73,36 @@ export default function ShippingPage() {
           <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} required />
         </div>
         <div>
-          <Label htmlFor="address">Address</Label>
-          <Input id="address" name="address" value={formData.address} onChange={handleChange} required />
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="gender">Gender</Label>
+          <Select onValueChange={handleGenderChange} defaultValue={formData.gender}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="MALE">Male</SelectItem>
+              <SelectItem value="FEMALE">Female</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="dateOfBirth">Date of Birth</Label>
+          <Input id="dateOfBirth" name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="street">Street Address</Label>
+          <Input id="street" name="street" value={formData.street} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="ward">Ward</Label>
+          <Input id="ward" name="ward" value={formData.ward} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="district">District</Label>
+          <Input id="district" name="district" value={formData.district} onChange={handleChange} />
         </div>
         <div>
           <Label htmlFor="city">City</Label>
@@ -59,8 +113,8 @@ export default function ShippingPage() {
           <Input id="country" name="country" value={formData.country} onChange={handleChange} required />
         </div>
         <div>
-          <Label htmlFor="postalCode">Postal Code</Label>
-          <Input id="postalCode" name="postalCode" value={formData.postalCode} onChange={handleChange} required />
+          <Label htmlFor="apartment">Apartment (Optional)</Label>
+          <Input id="apartment" name="apartment" value={formData.apartment} onChange={handleChange} />
         </div>
         <div className="space-y-2">
           <Label>Payment Method</Label>
@@ -88,4 +142,3 @@ export default function ShippingPage() {
     </div>
   )
 }
-

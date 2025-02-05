@@ -21,15 +21,15 @@ export async function POST(request: Request) {
     // console.log("VNP_HASH_SECRET:", process.env.VNP_HASH_SECRET);
 
     const paymentUrl = vnp.buildPaymentUrl({
-      vnp_Amount: amount * 100, // Convert to VNPay format
+      vnp_Amount: amount, // Convert to VNPay format
       vnp_IpAddr: clientIp as string,
       vnp_TxnRef: orderId,
       vnp_OrderInfo: orderInfo,
       vnp_OrderType: ProductCode.Other,
-      vnp_ReturnUrl: 'https://meostationary.netlify.app/checkout/payment/vnpay',
+      vnp_ReturnUrl: 'http://26.187.26.111:3000/checkout/payment/vnpay',
       vnp_Locale: VnpLocale.VN,
       vnp_CreateDate: dateFormat(new Date()),
-      vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+      vnp_ExpireDate: dateFormat(new Date(Date.now() + 60 * 60 * 60)),
     });
 
     console.log("Generated VNPay Payment URL:", paymentUrl);

@@ -13,6 +13,11 @@ generator client {
     provider = "prisma-client-js"
 }
 
+enum Gender {
+    MALE
+    FEMALE
+}
+
 enum StockStatus {
     OUT_OF_STOCK
     IN_STOCK
@@ -51,8 +56,8 @@ model Product {
     id         Int         @id @default(autoincrement())
     name       String
     price      Int
-    status     String?
-    createdAt  String
+    decription String?
+    createdAt  DateTime    @default(now())
     category   Category?   @relation(fields: [categoryId], references: [id])
     categoryId Int?
     orderItems OrderItem[]
@@ -61,13 +66,13 @@ model Product {
 }
 
 model User {
-    id          Int     @id @default(autoincrement())
+    id          Int      @id @default(autoincrement())
     fullName    String
-    email       String  @unique
-    gender      String?
+    email       String   @unique
+    gender      Gender
     dateOfBirth String?
-    createdAt   String
-    address     Address @relation(fields: [addressId], references: [id])
+    createdAt   DateTime @default(now())
+    address     Address  @relation(fields: [addressId], references: [id])
     addressId   Int
     orders      Order[]
 }

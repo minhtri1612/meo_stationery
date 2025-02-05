@@ -5,7 +5,19 @@ import { useEffect, useState } from "react";
 const PaymentPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("visa");
   const [loading, setLoading] = useState(false);
-
+  const [cartTotal, setCartTotal] = useState(0);
+  
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      const cartItems = JSON.parse(storedCart);
+      const total = cartItems.reduce((sum: number, item: any) =>
+          sum + item.price * item.quantity, 0
+      );
+      setCartTotal(total);
+    }
+  }, []);
+  
   // Use `window.location.search` instead of `useSearchParams`
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -22,10 +34,28 @@ const PaymentPage = () => {
   const handleVNPayPayment = async () => {
     setLoading(true);
     const orderId = `ORDER_${Date.now()}`;
-    const amount = 10000;
+    const amount = cartTotal;
     const orderInfo = "Payment for order";
 
     try {
+      // First save the order to database
+      const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+      const userDetails = JSON.parse(localStorage.getItem('userDetails') || '{}');
+
+      await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartItems,
+          userDetails,
+          paymentDetails: {
+            amount: cartTotal,
+            method: 'VNPAY',
+            status: 'PENDING',
+          },
+        }),
+      });
+      // Then proceed with VNPay payment
       const response = await fetch("/api/vnpay/generate-payment-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
