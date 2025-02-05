@@ -3,4 +3,6 @@
 /.idea/
 /prisma/
 /src/components/ui/
+.env.local
+natehigger
 /.next/
