@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       name: data.name,
       price: parseInt(data.price),
       quantity: parseInt(data.stock),
-      status: data.description,
+      description: data.description,
       createdAt: new Date().toISOString(),
       categoryId: data.categoryId,
     },

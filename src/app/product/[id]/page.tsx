@@ -50,7 +50,7 @@ const ProductPage = (props: { params: Params }) => {
           <div className="md:w-1/2">
             <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
             <p className="text-xl text-gray-600 mb-4">{formatToVND(product.price)}</p>
-            <p className="text-gray-700 mb-6">{product.status}</p>
+            <p className="text-gray-700 mb-6">{product.description}</p>
             <div className="flex flex-col gap-4 mb-6">
               <div className="flex items-center gap-2">
                 <span className="font-semibold">Stock Status:</span>

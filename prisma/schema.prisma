@@ -53,16 +53,16 @@ model OrderItem {
 }
 
 model Product {
-    id         Int         @id @default(autoincrement())
-    name       String
-    price      Int
-    decription String?
-    createdAt  DateTime    @default(now())
-    category   Category?   @relation(fields: [categoryId], references: [id])
-    categoryId Int?
-    orderItems OrderItem[]
-    stock      StockStatus @default(IN_STOCK)
-    quantity   Int
+    id          Int         @id @default(autoincrement())
+    name        String
+    price       Int
+    description String?
+    createdAt   DateTime    @default(now())
+    category    Category?   @relation(fields: [categoryId], references: [id])
+    categoryId  Int?
+    orderItems  OrderItem[]
+    stock       StockStatus @default(IN_STOCK)
+    quantity    Int
 }
 
 model User {

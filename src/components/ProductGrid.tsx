@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { useCart } from "@/hooks/useCart"
 import { Skeleton } from "@/components/ui/skeleton"
 import {formatToVND} from "@/lib/utils";
+import { StockStatus } from '@prisma/client'
+
 
 function SkeletonCard() {
   return (
@@ -20,8 +22,6 @@ function SkeletonCard() {
 }
 
 
-import { StockStatus } from '@prisma/client'
-
 interface Category {
   id: number
   catName: string
@@ -30,10 +30,10 @@ interface Category {
     name: string
     price: number
     stock: StockStatus
-    quantity: number
-    status?: string | null
-    createdAt?: string
-    categoryId?: number | null
+    description: string | null
+    quantity: number 
+    createdAt: Date
+    categoryId: number | null
   }[]
   children: {
     id: number
