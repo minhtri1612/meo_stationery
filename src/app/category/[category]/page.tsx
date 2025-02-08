@@ -6,6 +6,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { prisma } from '@/lib/prisma'
 import { Skeleton } from "@/components/ui/skeleton"
 import {use} from "react";
+import {formatToVND} from "@/lib/utils";
 
 function SkeletonCard() {
   return (
@@ -82,7 +83,7 @@ const CategoryPage = (props: { params: Params }) => {
                             <Link href={`/product/${product.id}`}>
                               <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
                             </Link>
-                            <p className="text-gray-600">${(product.price / 100).toFixed(2)}</p>
+                            <p className="text-gray-600">{formatToVND(product.price)}</p>
                             <div className="mt-2">
                     <span className={`text-sm ${product.stock === 'IN_STOCK' ? 'text-green-600' : 'text-red-600'}`}>
                       {product.stock}
