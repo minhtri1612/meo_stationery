@@ -11,11 +11,88 @@ export const getStockStatus = (quantity: number) => {
   return 'IN_STOCK'
 }
 
-export  const formatToVND = (price: number) => {
+export const formatToVND = (price: number) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
     minimumFractionDigits: 0
   }).format(price)
+}
+
+export const calculateTotalRevenue = (orders: any[]) => {
+  return orders.reduce((sum, order) => 
+    sum + (order.payment?.[0]?.amount || 0), 0)
+}
+
+export const getActiveUsers = (customers: any[]) => {
+  return customers.filter(c => 
+    new Date(c.lastOrderDate).getMonth() === new Date().getMonth()).length
+}
+
+export const generateChartData = (orders: any[]) => {
+  const chartData = orders.reduce((acc, order) => {
+    const month = new Date(order.createdAt).toLocaleString('default', { month: 'short' })
+    const amount = order.payment[0]?.amount || 0
+    acc[month] = (acc[month] || 0) + amount
+    return acc
+  }, {})
+
+  return Object.entries(chartData).map(([name, total]) => ({
+    name,
+    total
+  }))
+}
+
+export const getRecentSales = (orders: any[]) => {
+  return orders
+      .slice(0, 5)
+      .map(order => ({
+        name: order.user.fullName,
+        email: order.user.email,
+        amount: formatToVND(order.payment[0]?.amount || 0),
+      }))
+}
+
+export const calculatePercentageChange = (currentValue: number, previousValue: number) => {
+  if (previousValue === 0) return 100
+  return Number((((currentValue - previousValue) / previousValue) * 100).toFixed(1))
+}
+
+export const getMonthlyComparisons = (orders: any[]) => {
+  const currentDate = new Date()
+  const currentMonth = currentDate.getMonth()
+  const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1
+
+  const currentMonthOrders = orders.filter(order => 
+    new Date(order.createdAt).getMonth() === currentMonth
+  )
+  const previousMonthOrders = orders.filter(order => 
+    new Date(order.createdAt).getMonth() === previousMonth
+  )
+
+  return {
+    revenue: {
+      current: calculateTotalRevenue(currentMonthOrders),
+      previous: calculateTotalRevenue(previousMonthOrders)
+    },
+    customers: {
+      current: currentMonthOrders.reduce((acc, order) => {
+        acc.add(order.userId)
+        return acc
+      }, new Set()).size,
+      previous: previousMonthOrders.reduce((acc, order) => {
+        acc.add(order.userId)
+        return acc
+      }, new Set()).size
+    },
+    orders: {
+      current: currentMonthOrders.length,
+      previous: previousMonthOrders.length
+    },
+    activeUsers: {
+      current: getActiveUsers(currentMonthOrders),
+      previous: getActiveUsers(previousMonthOrders)
+    }
+  }
 }
 

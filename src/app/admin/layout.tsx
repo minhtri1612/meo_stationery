@@ -47,12 +47,12 @@ export default function AdminLayout({
   return (
     <div className={inter.className}>
       <SidebarProvider>
-        <div className="flex h-screen">
-          <Sidebar>
+        <div className="flex h-screen w-full">
+          <Sidebar className="w-64 shrink-0">
             <SidebarHeader>
-              <Link href="/" className="flex items-center gap-2 font-semibold">
+              <Link href="/" className="flex items-center gap-2 font-semibold p-4">
                 <Package className="h-6 w-6" />
-                <span>StationeryShop</span>
+                <span>StationeryShop Admin</span>
               </Link>
             </SidebarHeader>
             <SidebarContent>
@@ -66,7 +66,7 @@ export default function AdminLayout({
                           asChild
                           isActive={pathname === item.href}
                         >
-                          <Link href={item.href} className="flex items-center gap-2">
+                          <Link href={item.href} className="flex items-center gap-2 px-4 py-2">
                             <item.icon className="h-4 w-4" />
                             <span>{item.title}</span>
                           </Link>
@@ -78,7 +78,7 @@ export default function AdminLayout({
               </SidebarGroup>
             </SidebarContent>
           </Sidebar>
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto p-8 w-full">
             {children}
           </main>
         </div>

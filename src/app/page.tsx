@@ -1,6 +1,6 @@
 
 import { prisma } from '@/lib/prisma'
-import ProductGrid from "@/components/ProductGrid";
+import ProductGrid from "@/components/products/ProductGrid";
 
 export default async function Home() {
 

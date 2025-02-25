@@ -106,6 +106,11 @@ export async function GET() {
             amount: true,
           },
         },
+        items: {
+          include: {
+            product: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc',

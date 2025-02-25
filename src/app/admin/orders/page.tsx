@@ -8,6 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {formatToVND} from "@/lib/utils";
+import {Dialog, DialogContent, DialogTitle, DialogHeader} from "@/components/ui/dialog";
+
+interface OrderItem {
+    orderId: number
+    productId: number
+    quantity: number
+    product: {
+        name: string
+        price: number
+    }
+}
 
 interface Order {
   id: number
@@ -21,6 +32,7 @@ interface Order {
   payment: {
     amount: number
   }[]
+  items: OrderItem[]
 }
 
 export default function OrdersPage() {
@@ -28,7 +40,8 @@ export default function OrdersPage() {
     const [search, setSearch] = useState("")
     const [statusFilter, setStatusFilter] = useState("All")
     const [isLoading, setIsLoading] = useState(true)
-
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+    
     useEffect(() => {
         const fetchOrders = async () => {
             try {
@@ -138,7 +151,7 @@ export default function OrdersPage() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Button variant="outline" size="sm">
+                                            <Button variant="outline" size="sm" onClick={() => setSelectedOrder(order)}>
                                                 View Details
                                             </Button>
                                         </TableCell>
@@ -148,6 +161,63 @@ export default function OrdersPage() {
                         </Table>
                     </CardContent>
                 </Card>
+                <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Order Details</DialogTitle>
+                        </DialogHeader>
+                        {selectedOrder && (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="text-sm font-medium">Order ID:</div>
+                                    <div className="text-sm">{selectedOrder.id}</div>
+
+                                    <div className="text-sm font-medium">Status:</div>
+                                    <div className="text-sm">
+                                        <Badge className={`${getStatusColor(selectedOrder.status)} text-white`}>
+                                            {selectedOrder.status}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="text-sm font-medium">Date:</div>
+                                    <div className="text-sm">
+                                        {new Date(selectedOrder.createdAt).toLocaleDateString()}
+                                    </div>
+
+                                    <div className="text-sm font-medium">Customer:</div>
+                                    <div className="text-sm">{selectedOrder.user.fullName}</div>
+                                </div>
+
+                                <div className="mt-6">
+                                    <h3 className="text-sm font-medium mb-2">Order Items:</h3>
+                                    <div className="space-y-2">
+                                        {selectedOrder.items?.map((item) => (
+                                            <div key={`${item.orderId}-${item.productId}`}
+                                                 className="flex justify-between items-center border-b pb-2">
+                                                <div>
+                                                    <div className="text-sm font-medium">{item.product.name}</div>
+                                                    <div className="text-sm text-muted-foreground">
+                                                        Quantity: {item.quantity}
+                                                    </div>
+                                                </div>
+                                                <div className="text-sm font-medium">
+                                                    {formatToVND(item.product.price * item.quantity)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between items-center pt-4">
+                                    <div className="text-sm font-medium">Total Amount:</div>
+                                    <div className="text-lg font-bold">
+                                        {formatToVND(selectedOrder.payment[0]?.amount || 0)}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     )

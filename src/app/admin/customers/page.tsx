@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { formatToVND } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -15,57 +16,46 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 
-// Sample data - in a real app, this would come from your API
-const initialCustomers = [
-    {
-        id: 1,
-        name: "John Doe",
-        email: "john@example.com",
-        totalOrders: 5,
-        totalSpent: 250.5,
-        lastOrderDate: "2023-05-15",
-        orders: [
-            { id: "1001", date: "2023-05-15", total: 50.99, status: "Completed" },
-            { id: "1002", date: "2023-04-20", total: 75.5, status: "Completed" },
-            { id: "1003", date: "2023-03-10", total: 124.01, status: "Completed" },
-        ],
-    },
-    {
-        id: 2,
-        name: "Jane Smith",
-        email: "jane@example.com",
-        totalOrders: 3,
-        totalSpent: 150.25,
-        lastOrderDate: "2023-05-10",
-        orders: [
-            { id: "1004", date: "2023-05-10", total: 60.25, status: "Completed" },
-            { id: "1005", date: "2023-04-05", total: 45.0, status: "Completed" },
-            { id: "1006", date: "2023-03-01", total: 45.0, status: "Completed" },
-        ],
-    },
-    {
-        id: 3,
-        name: "Bob Johnson",
-        email: "bob@example.com",
-        totalOrders: 2,
-        totalSpent: 80.0,
-        lastOrderDate: "2023-05-05",
-        orders: [
-            { id: "1007", date: "2023-05-05", total: 40.0, status: "Completed" },
-            { id: "1008", date: "2023-04-15", total: 40.0, status: "Completed" },
-        ],
-    },
-]
-
+type Customer = {
+    id: number
+    name: string
+    email: string
+    totalOrders: number
+    totalSpent: number
+    lastOrderDate: string
+    orders: {
+        id: string
+        date: string
+        total: number
+        status: string
+    }[]
+}
 export default function CustomersPage() {
-    const [customers, setCustomers] = useState(initialCustomers)
+    const [customers, setCustomers] = useState([])
     const [search, setSearch] = useState("")
-    const [selectedCustomer, setSelectedCustomer] = useState<(typeof initialCustomers)[0] | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+    
+    useEffect(() => {
+        async function fetchCustomers() {
+            try {
+                const response = await fetch('/api/customers')
+                const data = await response.json()
+                setCustomers(data)
+            } catch (error) {
+                console.error('Failed to fetch customers:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchCustomers()
+    }, [])
 
     const filteredCustomers = customers.filter(
-        (customer) =>
+        (customer : Customer) =>
             customer.name.toLowerCase().includes(search.toLowerCase()) ||
-            customer.email.toLowerCase().includes(search.toLowerCase()),
+            customer.email.toLowerCase().includes(search.toLowerCase())
     )
 
     return (
@@ -100,12 +90,12 @@ export default function CustomersPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredCustomers.map((customer) => (
+                                {filteredCustomers.map((customer : Customer) => (
                                     <TableRow key={customer.id}>
                                         <TableCell className="font-medium">{customer.name}</TableCell>
                                         <TableCell>{customer.email}</TableCell>
                                         <TableCell>{customer.totalOrders}</TableCell>
-                                        <TableCell>${customer.totalSpent.toFixed(2)}</TableCell>
+                                        <TableCell>{formatToVND(customer.totalSpent)}</TableCell>
                                         <TableCell>{customer.lastOrderDate}</TableCell>
                                         <TableCell>
                                             <Dialog>
@@ -133,7 +123,7 @@ export default function CustomersPage() {
                                                                 <TableRow key={order.id}>
                                                                     <TableCell>{order.id}</TableCell>
                                                                     <TableCell>{order.date}</TableCell>
-                                                                    <TableCell>${order.total.toFixed(2)}</TableCell>
+                                                                    <TableCell>{formatToVND(order.total)}</TableCell>
                                                                     <TableCell>
                                                                         <Badge variant="outline">{order.status}</Badge>
                                                                     </TableCell>
@@ -154,4 +144,3 @@ export default function CustomersPage() {
         </div>
     )
 }
-
