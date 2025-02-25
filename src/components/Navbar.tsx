@@ -24,8 +24,40 @@ type Category = {
 }
 
 export default function Navbar() {
-  const [cartItems] = useState(0)
+  const [cartItemCount, setCartItemCount] = useState(0)
   const [categories, setCategories] = useState<Category[]>([])
+  const [isScrolled, setIsScrolled] = useState(false)
+  
+  const updateCartCount = () => {
+    const storedCart = localStorage.getItem('cart')
+    if (storedCart) {
+      const cartItems = JSON.parse(storedCart)
+      setCartItemCount(cartItems.length)
+    } else {
+      setCartItemCount(0)
+    }
+  }
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+  useEffect(() => {
+    updateCartCount() // Initial count
+    
+    // Listen for both storage and custom cartUpdated events
+    window.addEventListener('cartUpdated', updateCartCount)
+    window.addEventListener('storage', updateCartCount)
+    
+    return () => {
+      window.removeEventListener('cartUpdated', updateCartCount)
+      window.removeEventListener('storage', updateCartCount)
+    }
+  }, [])
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -37,7 +69,7 @@ export default function Navbar() {
   }, [])
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="bg-white shadow-md fixed top-0 w-full z-50 ">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -89,9 +121,9 @@ export default function Navbar() {
             <Link href="/cart">
               <Button variant="ghost" className="relative">
                 <ShoppingCart className="h-6 w-6" />
-                {cartItems > 0 && (
+                {cartItemCount > 0 && (
                   <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                    {cartItems}
+                    {cartItemCount}
                   </span>
                 )}
               </Button>

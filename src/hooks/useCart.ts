@@ -18,26 +18,19 @@ export function useCart() {
     }
   }, [])
 
-  const addItem = (product: CartItem) => {
-    setItems(currentItems => {
-      const existingItem = currentItems.find(item => item.id === product.id)
-      let newItems
-      
-      if (existingItem) {
-        newItems = currentItems.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      } else {
-        newItems = [...currentItems, { ...product, quantity: 1 }]
-      }
-      
-      localStorage.setItem('cart', JSON.stringify(newItems))
-      return newItems
-    })
+  const addItem = (item: CartItem) => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+    const existingItem = cart.find((i: CartItem) => i.id === item.id)
+  
+    if (existingItem) {
+      existingItem.quantity += item.quantity
+    } else {
+      cart.push(item)
+    }
+  
+    localStorage.setItem('cart', JSON.stringify(cart))
+    triggerCartUpdate()
   }
-
   const removeItem = (id: number) => {
     setItems(currentItems => {
       const newItems = currentItems.filter(item => item.id !== id)
@@ -54,6 +47,7 @@ export function useCart() {
       localStorage.setItem('cart', JSON.stringify(newItems))
       return newItems
     })
+    triggerCartUpdate()
   }
 
   return {
@@ -64,3 +58,7 @@ export function useCart() {
     totalItems: items.reduce((sum, item) => sum + item.quantity, 0)
   }
 }
+const triggerCartUpdate = () => {
+  window.dispatchEvent(new Event('cartUpdated'))
+}
+
