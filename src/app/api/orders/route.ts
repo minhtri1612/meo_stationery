@@ -76,8 +76,7 @@ export async function POST(request: Request) {
 
       return newOrder;
     });
-
-
+    
     return NextResponse.json({
       success: true,
       data: { order, user, address }
@@ -88,6 +87,41 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { success: false, error: "Failed to create order" },
       { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const orders = await prisma.order.findMany({
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
+        payment: {
+          select: {
+            amount: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      orders
+    });
+
+  } catch (error) {
+    console.error('Failed to fetch orders:', error);
+    return NextResponse.json(
+        { success: false, error: "Failed to fetch orders" },
+        { status: 500 }
     );
   }
 }

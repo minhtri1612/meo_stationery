@@ -15,7 +15,7 @@ export default async function Home() {
   })
 
   return (
-      <div>
+      <div className="pt-16">
         <h1 className="text-3xl font-bold mb-8">Welcome to StationeryShop</h1>
           <ProductGrid categories={categories}/>
       </div>

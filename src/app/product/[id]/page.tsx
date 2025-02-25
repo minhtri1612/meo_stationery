@@ -1,26 +1,39 @@
+'use client'
+
 import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { prisma } from '@/lib/prisma'
 import {formatToVND} from "@/lib/utils";
-import {use} from "react";
+import {use, useState, useEffect} from "react";
+import {useCart} from "@/hooks/useCart";
 
-type Params = Promise<{ id: string }>
-
-const ProductPage = (props: { params: Params }) => {
+const ProductPage = (props: { params: Promise<{ id: string }> }) => {
+  const { addItem } = useCart()
+  const [quantity, setQuantity] = useState(1)
+  const [product, setProduct] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const params = use(props.params)
-  const product = use(prisma.product.findUnique({
-    where: {
-      id: parseInt(params.id)
-    },
-    include: {
-      category: true
-    }
-  }))
 
-  if (!product) {
-    notFound()
-  }
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`/api/products?id=${params.id}`)
+        const data = await response.json()
+        if (!data) notFound()
+        setProduct(data)
+      } catch (error) {
+        console.error(error)
+        notFound()
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProduct()
+  }, [params.id])
+
+
+  if (loading) return <div>Loading...</div>
+  if (!product) return notFound()
 
   return (
       <>
@@ -75,7 +88,17 @@ const ProductPage = (props: { params: Params }) => {
                 />
               </div>
             </div>
-            <Button size="lg" disabled={product.stock === 'OUT_OF_STOCK'}>
+            <Button
+                size="lg"
+                disabled={product.stock === 'OUT_OF_STOCK'}
+                onClick={() => addItem({
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  quantity: quantity,
+                  stock: product.quantity
+                })}
+            >
               {product.stock === 'OUT_OF_STOCK' ? 'Out of Stock' : 'Add to Cart'}
             </Button>
           </div>

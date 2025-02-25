@@ -21,7 +21,6 @@ function SkeletonCard() {
   )
 }
 
-
 interface Category {
   id: number
   catName: string
@@ -56,7 +55,7 @@ export default function ProductGrid({ categories }: { categories: Category[] }) 
                   <CardContent className="p-4">
                     <Link href={`/product/${product.id}`}>
                       <img
-                        src="/placeholder.svg"
+                        src={"/placeholder.svg"}
                         alt={product.name}
                         className="w-full h-48 object-cover mb-4"
                       />
