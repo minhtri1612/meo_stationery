@@ -10,7 +10,6 @@ import {useEffect, useState} from "react";
 import {
   formatToVND,
   calculateTotalRevenue,
-  getActiveUsers,
   generateChartData,
   getRecentSales, calculatePercentageChange, getMonthlyComparisons
 } from "@/lib/utils"
@@ -38,19 +37,36 @@ export default function DashboardPage() {
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date()
   })
-  
+
+  const normalizeDate = (date: Date, isStart: boolean) => {
+    const d = new Date(date)
+    if (isStart) {
+      d.setHours(0, 0, 0, 0)
+    } else {
+      d.setHours(23, 59, 59, 999)
+    }
+    return d
+  }
+
   const filteredOrders = orders.filter((order: Order) => {
     const orderDate = new Date(order.createdAt)
-    return (!dateRange?.from || orderDate >= dateRange.from) &&
-        (!dateRange?.to || orderDate <= dateRange.to)
+    if (dateRange?.from) {
+      const fromDate = normalizeDate(dateRange.from, true)
+      if (orderDate < fromDate) return false
+    }
+    if (dateRange?.to) {
+      const toDate = normalizeDate(dateRange.to, false)
+      if (orderDate > toDate) return false
+    }
+    return true
   })
   
   const totalOrders = filteredOrders.length
   const totalCustomers = customers.length
-  const totalRevenue = calculateTotalRevenue(orders)
-  const monthlyData = generateChartData(orders)
-  const recentSales = getRecentSales(orders)
-  
+  const totalRevenue = calculateTotalRevenue(filteredOrders)
+  const monthlyData = generateChartData(filteredOrders)
+  const recentSales = getRecentSales(filteredOrders)
+  const comparisons = getMonthlyComparisons(filteredOrders)
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -75,14 +91,15 @@ export default function DashboardPage() {
     fetchDashboardData()
   }, [])
   
-  const comparisons = getMonthlyComparisons(orders)
-  
   return (
     <div className="flex-1 space-y-4">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
-          <CalendarDateRangePicker />
+          <CalendarDateRangePicker
+              value={dateRange}
+              onDateChange={setDateRange}
+          />
           <Button size="sm">
             <Download className="mr-2 h-4 w-4" />
             Download

@@ -6,6 +6,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import {formatToVND} from "@/lib/utils";
 import {use, useState, useEffect} from "react";
 import {useCart} from "@/hooks/useCart";
+import { toast } from "sonner"
 
 const ProductPage = (props: { params: Promise<{ id: string }> }) => {
   const { addItem } = useCart()
@@ -13,6 +14,20 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
   const [product, setProduct] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const params = use(props.params)
+  
+  const handleAddToCart = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      stock: product.quantity
+    })
+
+    toast.success("Added to cart!", {
+      description: `${quantity}x ${product.name} added to your cart`,
+    })
+  }
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -37,7 +52,7 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
 
   return (
       <>
-        <Breadcrumb className="mb-4">
+        <Breadcrumb className="mb-4 pt-16">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/">Home</BreadcrumbLink>
@@ -83,7 +98,8 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
                     name="quantity"
                     min="1"
                     max={product.quantity}
-                    defaultValue="1"
+                    value={quantity}
+                    onChange={(e) => setQuantity(parseInt(e.target.value))}
                     className="border rounded px-2 py-1 w-16"
                 />
               </div>
@@ -91,13 +107,7 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
             <Button
                 size="lg"
                 disabled={product.stock === 'OUT_OF_STOCK'}
-                onClick={() => addItem({
-                  id: product.id,
-                  name: product.name,
-                  price: product.price,
-                  quantity: quantity,
-                  stock: product.quantity
-                })}
+                onClick={handleAddToCart}
             >
               {product.stock === 'OUT_OF_STOCK' ? 'Out of Stock' : 'Add to Cart'}
             </Button>

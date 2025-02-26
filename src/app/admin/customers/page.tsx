@@ -35,6 +35,23 @@ export default function CustomersPage() {
     const [search, setSearch] = useState("")
     const [loading, setLoading] = useState(true)
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "DELIVERED":
+                return "bg-green-500"
+            case "PROCESSING":
+                return "bg-blue-500"
+            case "SHIPPED":
+                return "bg-yellow-500"
+            case "PENDING":
+                return "bg-orange-500"
+            case "CANCELLED":
+                return "bg-red-500"
+            default:
+                return "bg-gray-500"
+        }
+    }
     
     useEffect(() => {
         async function fetchCustomers() {
@@ -96,7 +113,7 @@ export default function CustomersPage() {
                                         <TableCell>{customer.email}</TableCell>
                                         <TableCell>{customer.totalOrders}</TableCell>
                                         <TableCell>{formatToVND(customer.totalSpent)}</TableCell>
-                                        <TableCell>{customer.lastOrderDate}</TableCell>
+                                        <TableCell>{new Date(customer.lastOrderDate).toLocaleDateString()}</TableCell>
                                         <TableCell>
                                             <Dialog>
                                                 <DialogTrigger asChild>
@@ -125,7 +142,9 @@ export default function CustomersPage() {
                                                                     <TableCell>{order.date}</TableCell>
                                                                     <TableCell>{formatToVND(order.total)}</TableCell>
                                                                     <TableCell>
-                                                                        <Badge variant="outline">{order.status}</Badge>
+                                                                        <Badge className={`${getStatusColor(order.status)} text-white`}>
+                                                                            {order.status}
+                                                                        </Badge>
                                                                     </TableCell>
                                                                 </TableRow>
                                                             ))}

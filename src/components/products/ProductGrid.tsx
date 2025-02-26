@@ -7,6 +7,7 @@ import { useCart } from "@/hooks/useCart"
 import { Skeleton } from "@/components/ui/skeleton"
 import {formatToVND} from "@/lib/utils";
 import { StockStatus } from '@prisma/client'
+import {toast} from "sonner";
 
 
 function SkeletonCard() {
@@ -43,6 +44,21 @@ interface Category {
 
 export default function ProductGrid({ categories }: { categories: Category[] }) {
   const { addItem } = useCart()
+  
+  const handleAddToCart = (product: any) => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      stock: product.quantity
+    })
+
+    toast.success("Added to cart!", {
+      description: `1x ${product.name} added to your cart`,
+    })
+  }
+  
   return (
     <>
       {categories.map((category) => (
@@ -72,15 +88,9 @@ export default function ProductGrid({ categories }: { categories: Category[] }) 
                   </CardContent>
                   <CardFooter>
                     <Button
-                      className="w-full"
-                      disabled={product.stock === 'OUT_OF_STOCK'}
-                      onClick={() => addItem({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        quantity: 1,
-                        stock: product.quantity
-                      })}
+                        className="w-full"
+                        disabled={product.stock === 'OUT_OF_STOCK'}
+                        onClick={() => handleAddToCart(product)}
                     >
                       {product.stock === 'OUT_OF_STOCK' ? 'Out of Stock' : 'Add to Cart'}
                     </Button>

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {use, useEffect, useState} from "react";
 import {formatToVND} from "@/lib/utils";
 import {useCart} from "@/hooks/useCart";
+import {toast} from "sonner";
 
 function SkeletonCard() {
   return (
@@ -57,6 +58,19 @@ const CategoryPage = (props: { params: Params }) => {
     const params = use(props.params)
     const decodedCategory = decodeURIComponent(params.category)
 
+    const handleAddToCart = (product: any) => {
+        addItem({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: 1,
+            stock: product.quantity
+        })
+
+        toast.success("Added to cart!", {
+            description: `1x ${product.name} added to your cart`,
+        })
+    }
     useEffect(() => {
         const fetchCategory = async () => {
             try {
@@ -121,13 +135,7 @@ const CategoryPage = (props: { params: Params }) => {
                             <Button
                                 className="w-full"
                                 disabled={product.stock === 'OUT_OF_STOCK'}
-                                onClick={() => addItem({
-                                    id: product.id,
-                                    name: product.name,
-                                    price: product.price,
-                                    quantity: 1,
-                                    stock: product.quantity
-                                })}
+                                onClick={() => handleAddToCart(product)}
                             >
                               {product.stock === 'OUT_OF_STOCK' ? 'Out of Stock' : 'Add to Cart'}
                             </Button>
@@ -175,13 +183,7 @@ const CategoryPage = (props: { params: Params }) => {
                     <Button
                         className="w-full"
                         disabled={product.stock === 'OUT_OF_STOCK'}
-                        onClick={() => addItem({
-                            id: product.id,
-                            name: product.name,
-                            price: product.price,
-                            quantity: 1,
-                            stock: product.quantity
-                        })}
+                        onClick={() => handleAddToCart(product)}
                     >
                         {product.stock === 'OUT_OF_STOCK' ? 'Out of Stock' : 'Add to Cart'}
                     </Button>

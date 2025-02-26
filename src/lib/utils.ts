@@ -24,11 +24,6 @@ export const calculateTotalRevenue = (orders: any[]) => {
     sum + (order.payment?.[0]?.amount || 0), 0)
 }
 
-export const getActiveUsers = (customers: any[]) => {
-  return customers.filter(c => 
-    new Date(c.lastOrderDate).getMonth() === new Date().getMonth()).length
-}
-
 export const generateChartData = (orders: any[]) => {
   const chartData = orders.reduce((acc, order) => {
     const month = new Date(order.createdAt).toLocaleString('default', { month: 'short' })
@@ -61,14 +56,19 @@ export const calculatePercentageChange = (currentValue: number, previousValue: n
 export const getMonthlyComparisons = (orders: any[]) => {
   const currentDate = new Date()
   const currentMonth = currentDate.getMonth()
+  const currentYear = currentDate.getFullYear()
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1
+  const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear
 
-  const currentMonthOrders = orders.filter(order => 
-    new Date(order.createdAt).getMonth() === currentMonth
-  )
-  const previousMonthOrders = orders.filter(order => 
-    new Date(order.createdAt).getMonth() === previousMonth
-  )
+  const currentMonthOrders = orders.filter(order => {
+    const date = new Date(order.createdAt)
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear
+  })
+
+  const previousMonthOrders = orders.filter(order => {
+    const date = new Date(order.createdAt)
+    return date.getMonth() === previousMonth && date.getFullYear() === previousYear
+  })
 
   return {
     revenue: {
@@ -89,10 +89,6 @@ export const getMonthlyComparisons = (orders: any[]) => {
       current: currentMonthOrders.length,
       previous: previousMonthOrders.length
     },
-    activeUsers: {
-      current: getActiveUsers(currentMonthOrders),
-      previous: getActiveUsers(previousMonthOrders)
-    }
   }
 }
 
