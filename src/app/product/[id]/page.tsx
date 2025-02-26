@@ -7,6 +7,7 @@ import {formatToVND} from "@/lib/utils";
 import {use, useState, useEffect} from "react";
 import {useCart} from "@/hooks/useCart";
 import { toast } from "sonner"
+import {Minus, Plus} from "lucide-react";
 
 const ProductPage = (props: { params: Promise<{ id: string }> }) => {
   const { addItem } = useCart()
@@ -92,16 +93,37 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
               </div>
               <div className="flex items-center gap-4">
                 <label htmlFor="quantity" className="font-semibold">Order Quantity:</label>
-                <input
-                    type="number"
-                    id="quantity"
-                    name="quantity"
-                    min="1"
-                    max={product.quantity}
-                    value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value))}
-                    className="border rounded px-2 py-1 w-16"
-                />
+                <div className="inline-flex items-center border rounded-md shadow-sm">
+                  <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <input
+                      type="text"
+                      value={quantity}
+                      onChange={(e) => {
+                        const value = Number.parseInt(e.target.value)
+                        if (!isNaN(value) && value >= 1 && value <= product.quantity) {
+                          setQuantity(value)
+                        }
+                      }}
+                      className="w-12 text-center focus:outline-none [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                  />
+                  <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setQuantity(Math.min(product.quantity, quantity + 1))}
+                      disabled={quantity >= product.quantity}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
             <Button

@@ -39,15 +39,16 @@ export default function ProductsPage() {
     description: "",
   })
   
+  const filteredProducts = products.filter(product =>
+      product.name.toLowerCase().includes(search.toLowerCase()) ||
+      product.category?.catName.toLowerCase().includes(search.toLowerCase()) ||
+      product.stock.toLowerCase().includes(search.toLowerCase())
+  )
+  
   const openAddDialog = () => {
     resetForm()
     setDialogContent('add')
   }
-  
-  useEffect(() => {
-    fetchProducts()
-    fetchCategories()
-  }, [])
 
   const fetchProducts = () => {
     fetch('/api/products')
@@ -60,7 +61,12 @@ export default function ProductsPage() {
       .then(res => res.json())
       .then(data => setCategories(data))
   }
-
+  
+  useEffect(() => {
+    fetchProducts()
+    fetchCategories()
+  }, [])
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
@@ -121,11 +127,6 @@ export default function ProductsPage() {
     setDialogContent('edit')
   }
   
-  const handleDialogClose = () => {
-    setDialogContent(null)
-    resetForm()
-  }
-  
   const resetForm = () => {
     setFormData({
       name: "",
@@ -183,7 +184,7 @@ export default function ProductsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>{product.name}</TableCell>
                   <TableCell>{product.category?.catName || 'Uncategorized'}</TableCell>

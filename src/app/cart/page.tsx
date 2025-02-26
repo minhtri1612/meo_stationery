@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {formatToVND} from "@/lib/utils";
+import {Minus, Plus} from "lucide-react";
 
 type CartItem = {
   id: number
@@ -62,14 +63,37 @@ export default function CartPage() {
                   <TableCell>{item.name}</TableCell>
                   <TableCell>{formatToVND(item.price)}</TableCell>
                   <TableCell>
-                    <input 
-                      type="number" 
-                      min="1"
-                      max={item.stock}
-                      value={item.quantity} 
-                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                      className="w-16 p-1 border rounded"
-                    />
+                    <div className="inline-flex items-center border rounded-md">
+                      <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                          disabled={item.quantity <= 1}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <input
+                          type="text"
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const value = Number.parseInt(e.target.value)
+                            if (!isNaN(value) && value >= 1 && value <= item.stock) {
+                              updateQuantity(item.id, value)
+                            }
+                          }}
+                          className="w-12 text-center focus:outline-none"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                      />
+                      <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => updateQuantity(item.id, Math.min(item.stock, item.quantity + 1))}
+                          disabled={item.quantity >= item.stock}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                   <TableCell>{formatToVND(item.price * item.quantity)}</TableCell>
                   <TableCell>
