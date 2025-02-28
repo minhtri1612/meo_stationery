@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import { useCart } from "@/hooks/useCart"
 import { Skeleton } from "@/components/ui/skeleton"
 import {formatToVND} from "@/lib/utils";
-import { StockStatus } from '@prisma/client'
 import {toast} from "sonner";
+import {Product} from "@prisma/client";
 
 
 function SkeletonCard() {
@@ -22,30 +22,10 @@ function SkeletonCard() {
   )
 }
 
-interface Category {
-  id: number
-  catName: string
-  products: {
-    id: number
-    name: string
-    price: number
-    stock: StockStatus
-    description: string | null
-    quantity: number 
-    createdAt: Date
-    categoryId: number | null
-  }[]
-  children: {
-    id: number
-    catName: string
-    parentId: number | null
-  }[]
-}
-
-export default function ProductGrid({ categories }: { categories: Category[] }) {
+export default function ProductGrid({ products }: { products: Product[] }) {
   const { addItem } = useCart()
-  
-  const handleAddToCart = (product: any) => {
+
+  const handleAddToCart = (product: Product) => {
     addItem({
       id: product.id,
       name: product.name,
@@ -58,22 +38,18 @@ export default function ProductGrid({ categories }: { categories: Category[] }) 
       description: `1x ${product.name} added to your cart`,
     })
   }
-  
+
   return (
-    <>
-      {categories.map((category) => (
-        <div key={category.id} className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">{category.catName}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {category.products.length > 0 ? (
-              category.products.map((product) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {products.length > 0 ? (
+            products.map((product) => (
                 <Card key={product.id}>
                   <CardContent className="p-4">
                     <Link href={`/product/${product.id}`}>
                       <img
-                        src={"/placeholder.svg"}
-                        alt={product.name}
-                        className="w-full h-48 object-cover mb-4"
+                          src={"/placeholder.svg"}
+                          alt={product.name}
+                          className="w-full h-48 object-cover mb-4"
                       />
                     </Link>
                     <Link href={`/product/${product.id}`}>
@@ -81,18 +57,18 @@ export default function ProductGrid({ categories }: { categories: Category[] }) 
                     </Link>
                     <p className="text-gray-600">{formatToVND(product.price)}</p>
                     <div className="mt-2">
-                      <span className={`text-sm ${product.stock === 'IN_STOCK' ? 'text-green-600' : 'text-red-600'}`}>
-                        {product.stock}
-                      </span>
+                <span className={`text-sm ${product.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {product.quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                </span>
                     </div>
                   </CardContent>
                   <CardFooter>
                     <Button
                         className="w-full"
-                        disabled={product.stock === 'OUT_OF_STOCK'}
+                        disabled={product.quantity === 0}
                         onClick={() => handleAddToCart(product)}
                     >
-                      {product.stock === 'OUT_OF_STOCK' ? 'Out of Stock' : 'Add to Cart'}
+                      {product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -104,10 +80,7 @@ export default function ProductGrid({ categories }: { categories: Category[] }) 
                 <SkeletonCard />
                 <SkeletonCard />
               </>
-            )}
-          </div>
-        </div>
-      ))}
-    </>
+        )}
+      </div>
   )
 }

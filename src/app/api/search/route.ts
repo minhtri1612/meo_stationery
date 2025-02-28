@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       id: true,
       name: true,
       price: true,
-      stock: true
+      quantity: true
     },
     take: 5
   })

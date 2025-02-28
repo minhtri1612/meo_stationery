@@ -60,10 +60,6 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/category/${product.category?.catName.toLowerCase()}`}>{product.category?.catName}</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
               <BreadcrumbPage>{product.name}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -81,12 +77,6 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
             <p className="text-xl text-gray-600 mb-4">{formatToVND(product.price)}</p>
             <p className="text-gray-700 mb-6">{product.description}</p>
             <div className="flex flex-col gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">Stock Status:</span>
-                <span className={`${product.stock === 'IN_STOCK' ? 'text-green-600' : 'text-red-600'}`}>
-                {product.stock}
-              </span>
-              </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">Available Quantity:</span>
                 <span>{product.quantity}</span>
@@ -128,10 +118,10 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
             </div>
             <Button
                 size="lg"
-                disabled={product.stock === 'OUT_OF_STOCK'}
+                disabled={product.quantity === 0}
                 onClick={handleAddToCart}
             >
-              {product.stock === 'OUT_OF_STOCK' ? 'Out of Stock' : 'Add to Cart'}
+              {product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 export type CartItem = {
-  id: number
+  id: string
   name: string
   price: number
   quantity: number
@@ -31,7 +31,7 @@ export function useCart() {
     localStorage.setItem('cart', JSON.stringify(cart))
     triggerCartUpdate()
   }
-  const removeItem = (id: number) => {
+  const removeItem = (id: string) => {
     setItems(currentItems => {
       const newItems = currentItems.filter(item => item.id !== id)
       localStorage.setItem('cart', JSON.stringify(newItems))
@@ -39,7 +39,7 @@ export function useCart() {
     })
   }
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (id: string, quantity: number) => {
     setItems(currentItems => {
       const newItems = currentItems.map(item =>
         item.id === id ? { ...item, quantity } : item

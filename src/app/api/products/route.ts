@@ -7,37 +7,28 @@ export async function GET(request: Request) {
   const id = url.searchParams.get('id');
 
   if (!id) {
-    const products = await prisma.product.findMany({
-      include: {
-        category: true
-      }
-    });
+    const products = await prisma.product.findMany();
     return NextResponse.json(products);
   }
 
   const product = await prisma.product.findUnique({
     where: {
-      id: parseInt(id)
-    },
-    include: {
-      category: true
+      id: id
     }
   });
 
   return NextResponse.json(product);
 }
-
 // POST /api/products
 export async function POST(request: Request) {
   const data = await request.json();
   const product = await prisma.product.create({
     data: {
+      id: data.id,
       name: data.name,
       price: parseInt(data.price),
-      quantity: parseInt(data.stock),
-      description: data.description,
-      categoryId: parseInt(data.categoryId),
-      stock: data.quantity > 20 ? "IN_STOCK" : data.quantity > 5 ? "RUNNING_LOW" : "OUT_OF_STOCK"
+      quantity: parseInt(data.quantity),
+      description: data.description
     }
   });
   return NextResponse.json(product);
@@ -51,15 +42,13 @@ export async function PUT(request: Request) {
 
   const product = await prisma.product.update({
     where: {
-      id: parseInt(id!)
+      id: id!
     },
     data: {
       name: data.name,
       price: parseInt(data.price),
-      quantity: parseInt(data.stock),
-      description: data.description,
-      categoryId: parseInt(data.categoryId),
-      stock: data.quantity > 20 ? "IN_STOCK" : data.quantity > 5 ? "RUNNING_LOW" : "OUT_OF_STOCK"
+      quantity: parseInt(data.quantity),
+      description: data.description
     }
   });
 
@@ -73,7 +62,7 @@ export async function DELETE(request: Request) {
 
   const product = await prisma.product.delete({
     where: {
-      id: parseInt(id!)
+      id: id!
     }
   });
 

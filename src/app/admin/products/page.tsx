@@ -11,22 +11,15 @@ import { formatToVND } from "@/lib/utils"
 import { ProductDialog } from "@/components/products/product-dialog"
 
 type Product = {
-  id: number
+  id: string
   name: string
   price: number
-  status: string | null
-  categoryId: number | null
-  stock: string
   quantity: number
   description: string | null
-  category: {
-    catName: string
-  } | null
 }
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<{ id: number; catName: string }[]>([])
   const [search, setSearch] = useState("")
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [dialogContent, setDialogContent] = useState<'add' | 'edit' | null>(null)
@@ -34,15 +27,12 @@ export default function ProductsPage() {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
-    stock: "",
-    categoryId: "",
+    quantity: "",
     description: "",
   })
   
   const filteredProducts = products.filter(product =>
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.category?.catName.toLowerCase().includes(search.toLowerCase()) ||
-      product.stock.toLowerCase().includes(search.toLowerCase())
+      product.name.toLowerCase().includes(search.toLowerCase())
   )
   
   const openAddDialog = () => {
@@ -55,24 +45,13 @@ export default function ProductsPage() {
       .then(res => res.json())
       .then(data => setProducts(data))
   }
-
-  const fetchCategories = () => {
-    fetch('/api/categories')
-      .then(res => res.json())
-      .then(data => setCategories(data))
-  }
   
   useEffect(() => {
     fetchProducts()
-    fetchCategories()
   }, [])
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleSelectChange = (value: string) => {
-    setFormData({ ...formData, categoryId: value })
   }
 
   const handleAddProduct = async () => {
@@ -105,7 +84,7 @@ export default function ProductsPage() {
     }
   }
 
-  const handleDeleteProduct = async (id: number) => {
+  const handleDeleteProduct = async (id: string) => {
     const response = await fetch(`/api/products?id=${id}`, {
       method: 'DELETE',
     })
@@ -120,8 +99,7 @@ export default function ProductsPage() {
     setFormData({
       name: product.name,
       price: product.price.toString(),
-      stock: product.quantity.toString(),
-      categoryId: product.categoryId?.toString() || '',
+      quantity: product.quantity.toString(),
       description: product.description || '',
     })
     setDialogContent('edit')
@@ -131,8 +109,7 @@ export default function ProductsPage() {
     setFormData({
       name: "",
       price: "",
-      stock: "",
-      categoryId: "",
+      quantity: "",
       description: "",
     })
     setEditingProduct(null)
@@ -150,9 +127,7 @@ export default function ProductsPage() {
               <ProductDialog
                   isEdit={dialogContent === 'edit'}
                   formData={formData}
-                  categories={categories}
                   onInputChange={handleInputChange}
-                  onSelectChange={handleSelectChange}
                   onSubmit={dialogContent === 'edit' ? handleEditProduct : handleAddProduct}
               />
           )}
@@ -176,7 +151,6 @@ export default function ProductsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Quantity</TableHead>
                 <TableHead>Status</TableHead>
@@ -187,13 +161,17 @@ export default function ProductsPage() {
               {filteredProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.category?.catName || 'Uncategorized'}</TableCell>
                   <TableCell>{formatToVND(product.price)}</TableCell>
                   <TableCell>{product.quantity}</TableCell>
                   <TableCell>
-                    <Badge variant={product.stock === 'OUT_OF_STOCK' ? 'destructive' : 
-                                   product.stock === 'RUNNING_LOW' ? 'secondary' : 'default'}>
-                      {product.stock}
+                    <Badge variant={
+                      product.quantity === 0 ? 'destructive' :
+                          product.quantity <= 5 ? 'secondary' :
+                              'default'
+                    }>
+                      {product.quantity === 0 ? 'Out of Stock' :
+                          product.quantity <= 5 ? 'Running Low' :
+                              'In Stock'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -208,9 +186,7 @@ export default function ProductsPage() {
                             <ProductDialog
                                 isEdit={true}
                                 formData={formData}
-                                categories={categories}
                                 onInputChange={handleInputChange}
-                                onSelectChange={handleSelectChange}
                                 onSubmit={handleEditProduct}
                             />
                         )}
