@@ -39,9 +39,6 @@ export async function POST(request: Request) {
             quantity: {
               decrement: item.quantity
             },
-            stock: {
-              set: item.quantity <= 1 ? 'OUT_OF_STOCK' : 'IN_STOCK'
-            }
           }
         });
       }
