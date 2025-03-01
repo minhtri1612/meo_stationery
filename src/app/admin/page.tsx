@@ -188,8 +188,8 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-8">
-              {recentSales.map((sale) => (
-                  <div key={sale.email} className="flex items-center">
+              {recentSales.map((sale, index) => (
+                  <div key={`${sale.email}-${sale.id}-${index}`} className="flex items-center">
                     <Avatar className="h-9 w-9">
                       <AvatarImage src="/placeholder.svg" alt={sale.name} />
                       <AvatarFallback>

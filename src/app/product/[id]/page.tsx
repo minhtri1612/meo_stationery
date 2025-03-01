@@ -28,8 +28,8 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
       stock: product.quantity
     })
 
-    toast.success("Added to cart!", {
-      description: `${quantity}x ${product.name} added to your cart`,
+    toast.success("Đã thêm vào giỏ hàng!", {
+      description: `${quantity} ${product.name} đã được thêm vào giỏ hàng của bạn.`,
     })
   }
   
@@ -166,11 +166,11 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
             <p className="text-gray-700 mb-6">{product.description}</p>
             <div className="flex flex-col gap-4 mb-6">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">Available Quantity:</span>
+                <span className="font-semibold">Số lượng có sẵn:</span>
                 <span>{product.quantity}</span>
               </div>
               <div className="flex items-center gap-4">
-                <label htmlFor="quantity" className="font-semibold">Order Quantity:</label>
+                <label htmlFor="quantity" className="font-semibold">Số lượng đặt:</label>
                 <div className="inline-flex items-center border rounded-md shadow-sm">
                   <Button
                       variant="ghost"
@@ -209,7 +209,7 @@ const ProductPage = (props: { params: Promise<{ id: string }> }) => {
                 disabled={product.quantity === 0}
                 onClick={handleAddToCart}
             >
-              {product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+              {product.quantity === 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
             </Button>
           </div>
         </div>

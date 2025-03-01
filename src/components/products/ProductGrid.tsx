@@ -34,8 +34,8 @@ export default function ProductGrid({ products }: { products: Product[] }) {
       stock: product.quantity
     })
 
-    toast.success("Added to cart!", {
-      description: `1x ${product.name} added to your cart`,
+    toast.success("Đã thêm vào giỏ hàng!", {
+      description: `1 ${product.name} đã được thêm vào giỏ hàng của bạn.`,
     })
   }
 
@@ -71,7 +71,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
                         disabled={product.quantity === 0}
                         onClick={() => handleAddToCart(product)}
                     >
-                      {product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                      {product.quantity === 0 ? 'Hết hàng' : 'Thêm vảo giỏ hàng'}
                     </Button>
                   </CardFooter>
                 </Card>

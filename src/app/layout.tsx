@@ -20,11 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
         <AdminRouteDetector>
           <Navbar />
         </AdminRouteDetector>
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 flex-grow">
           {children}
         </main>
         <Toaster richColors position="bottom-right" />

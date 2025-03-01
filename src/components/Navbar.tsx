@@ -104,7 +104,7 @@ export default function Navbar() {
               <div className="relative">
                 <Input
                     type="search"
-                    placeholder="Search products..."
+                    placeholder="Tìm sản phẩm..."
                     className="pl-10 pr-4 py-2 rounded-full w-[300px]"
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}

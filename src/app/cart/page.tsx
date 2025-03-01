@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {formatToVND} from "@/lib/utils";
 import {Minus, Plus} from "lucide-react";
+import {toast} from "sonner";
+import Image from "next/image";
 
 type CartItem = {
   id: number
@@ -25,6 +27,20 @@ export default function CartPage() {
     }
   }, [])
 
+  const validateQuantities = async () => {
+    for (const item of cartItems) {
+      const response = await fetch(`/api/products?id=${item.id}`)
+      const product = await response.json()
+      if (item.quantity > product.quantity) {
+        toast.error("Số lượng không hợp lệ", {
+          description: `Sản phẩm "${item.name}" vượt quá số lượng trong kho. Vui lòng kiểm tra lại số lượng của sản phẩm!.`,
+        })
+        return false
+      }
+    }
+    return true
+  }
+  
   const updateQuantity = (id: number, newQuantity: number) => {
     const updatedCart = cartItems.map(item => 
       item.id === id ? { ...item, quantity: newQuantity } : item
@@ -44,17 +60,17 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-5">Your Shopping Cart</h1>
+      <h1 className="text-3xl font-bold mb-5">Giỏ Hàng Của Bạn</h1>
       {cartItems.length > 0 ? (
         <>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Sản phẩm</TableHead>
+                <TableHead>Giá</TableHead>
+                <TableHead>Số lượng</TableHead>
+                <TableHead>Tổng</TableHead>
+                <TableHead>Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -97,24 +113,47 @@ export default function CartPage() {
                   </TableCell>
                   <TableCell>{formatToVND(item.price * item.quantity)}</TableCell>
                   <TableCell>
-                    <Button variant="destructive" size="sm" onClick={() => removeItem(item.id)}>Remove</Button>
+                    <Button variant="destructive" size="sm" onClick={() => removeItem(item.id)}>Xoá</Button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
           <div className="mt-5 text-right">
-            <p className="text-xl font-bold">Total: {formatToVND(total)}</p>
-            <Link href="/checkout/shipping">
-              <Button className="mt-3">Proceed to Checkout</Button>
-            </Link>
+            <p className="text-xl font-bold">Tổng cộng: {formatToVND(total)}</p>
+            <Button
+                className="mt-3"
+                onClick={async () => {
+                  const isValid = await validateQuantities()
+                  if (isValid) {
+                    window.location.href = '/checkout/shipping'
+                  }
+                }}
+            >
+              Tiến hành thanh toán
+            </Button>
           </div>
         </>
       ) : (
         <div className="text-center py-10">
-          <p className="text-xl mb-4">Your cart is empty</p>
+          <p className="text-xl mb-4">Giỏ hàng của bạn đang trống</p>
+          <div className="flex justify-center mb-8">
+            <Image
+                src="/shopping.jpg"
+                alt="Order Success"
+                width={300}
+                height={300}
+                className=" object-contain"
+                style={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  outline: "none",
+                  boxShadow: "none",
+                }}
+            />
+          </div>
           <Link href="/">
-            <Button>Continue Shopping</Button>
+            <Button>Tiếp tục mua sắm</Button>
           </Link>
         </div>
       )}

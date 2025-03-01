@@ -5,45 +5,44 @@ export async function POST(request: Request) {
   const { cartItems, userDetails, paymentDetails } = await request.json();
 
   try {
-    // Create address first
-    const address = await prisma.address.create({
-      data: {
-        street: userDetails.street,
-        ward: userDetails.ward,
-        district: userDetails.district,
-        city: userDetails.city,
-        country: userDetails.country,
-        apartment: userDetails.apartment,
-      },
+    // First check if user exists
+    let user = await prisma.user.findUnique({
+      where: { email: userDetails.email }
     });
 
-    // Create user with address relation
-    const user = await prisma.user.create({
-      data: {
-        fullName: userDetails.fullName,
-        email: userDetails.email,
-        gender: userDetails.gender,
-        dateOfBirth: userDetails.dateOfBirth,
-        createdAt: new Date().toISOString(),
-        addressId: address.id,
-      },
-    });
+    if (!user) {
+      // Create new user if doesn't exist
+      const address = await prisma.address.create({
+        data: {
+          street: userDetails.street,
+          ward: userDetails.ward,
+          district: userDetails.district,
+          city: userDetails.city,
+          country: userDetails.country,
+          apartment: userDetails.apartment,
+        },
+      });
 
-    // Create order with nested items and payment
+      user = await prisma.user.create({
+        data: {
+          fullName: userDetails.fullName,
+          email: userDetails.email,
+          gender: userDetails.gender,
+          dateOfBirth: userDetails.dateOfBirth,
+          addressId: address.id,
+        },
+      });
+    }
+
+    // Create order with existing or new user
     const order = await prisma.$transaction(async (tx) => {
-      // Update product quantities
       for (const item of cartItems) {
         await tx.product.update({
           where: { id: item.id },
-          data: {
-            quantity: {
-              decrement: item.quantity
-            },
-          }
+          data: { quantity: { decrement: item.quantity } },
         });
       }
 
-      // Create the order
       const newOrder = await tx.order.create({
         data: {
           userId: user.id,
@@ -60,8 +59,7 @@ export async function POST(request: Request) {
         },
       });
 
-    // Create payment record separately
-      const payment = await tx.payment.create({
+      await tx.payment.create({
         data: {
           orderId: newOrder.id,
           amount: paymentDetails.amount,
@@ -73,17 +71,14 @@ export async function POST(request: Request) {
 
       return newOrder;
     });
-    
-    return NextResponse.json({
-      success: true,
-      data: { order, user, address }
-    });
+
+    return NextResponse.json({ success: true, data: { order, user } });
 
   } catch (error) {
-    console.error('Order creation error:', error);
+    console.error("Order creation error:", error instanceof Error ? error.message : String(error));
     return NextResponse.json(
-      { success: false, error: "Failed to create order" },
-      { status: 500 }
+        { success: false, error: "Failed to create order", details: error instanceof Error ? error.message : "Unknown error" },
+        { status: 500 }
     );
   }
 }

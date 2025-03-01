@@ -42,9 +42,11 @@ export const getRecentSales = (orders: any[]) => {
   return orders
       .slice(0, 5)
       .map(order => ({
+        id: order.id,
         name: order.user.fullName,
         email: order.user.email,
         amount: formatToVND(order.payment[0]?.amount || 0),
+
       }))
 }
 
