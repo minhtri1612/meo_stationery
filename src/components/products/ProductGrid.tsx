@@ -47,9 +47,12 @@ export default function ProductGrid({ products }: { products: Product[] }) {
                   <CardContent className="p-4">
                     <Link href={`/product/${product.id}`}>
                       <img
-                          src={"/placeholder.svg"}
+                          src={`/products/${product.id}/0.jpg`}
                           alt={product.name}
-                          className="w-full h-48 object-cover mb-4"
+                          className="w-full h-72 object-cover mb-4"
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder.svg"
+                          }}
                       />
                     </Link>
                     <Link href={`/product/${product.id}`}>

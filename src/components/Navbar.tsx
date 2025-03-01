@@ -124,7 +124,7 @@ export default function Navbar() {
                           >
                             <div className="flex items-center space-x-4">
                               <img
-                                  src={"/placeholder.svg"}
+                                  src={`/products/${product.id}/0.jpg`}
                                   alt={product.name}
                                   className="w-12 h-12 object-cover rounded-md"
                               />

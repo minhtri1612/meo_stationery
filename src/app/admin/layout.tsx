@@ -6,6 +6,8 @@ import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupCon
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import {useState} from "react";
+import {LoginForm} from "@/components/LoginForm";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -43,7 +45,20 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
+  const handleLogin = () => {
+    setIsLoggedIn(true)
+  }
+
+  if (!isLoggedIn) {
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+          <LoginForm onLogin={handleLogin} />
+        </div>
+    )
+  }
+  
   return (
     <div className={inter.className}>
       <SidebarProvider>
