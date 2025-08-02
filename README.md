@@ -95,8 +95,70 @@ The project includes these main models:
 
 ## Development
 
+### Local Development
+
 ```bash
 npm run dev
+```
+
+### Docker Development
+
+Build and run with Docker:
+
+```bash
+# Build the Docker image
+npm run docker:build
+
+# Run the container
+npm run docker:run
+
+# Or use docker-compose for easier management
+npm run docker:compose
+```
+
+The application will be available at http://localhost:3000
+
+### Database Information
+
+This project uses SQLite with Prisma ORM for local development. The database file is stored at `prisma/dev.db`.
+
+For production, you can switch to PostgreSQL by updating the schema and environment variables.
+
+### Database Schema
+
+The project includes these main models:
+- `User` - Customer information
+- `Product` - Stationery products
+- `Order` - Customer orders
+- `OrderItem` - Items within orders
+- `Payment` - Payment records
+- `Address` - Customer addresses
+
+## Docker Deployment
+
+### Building the Image
+
+```bash
+docker build -t meo-stationery:latest .
+```
+
+### Running with Docker
+
+```bash
+docker run -p 3000:3000 meo-stationery:latest
+```
+
+### Using Docker Compose
+
+```bash
+docker-compose up -d
+```
+
+To stop:
+
+```bash
+docker-compose down
+```
 # or
 yarn dev
 # or

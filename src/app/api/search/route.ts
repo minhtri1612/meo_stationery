@@ -18,8 +18,7 @@ export async function GET(request: Request) {
   const exactProducts = await prisma.product.findMany({
     where: {
       name: {
-        contains: query,
-        mode: 'insensitive'
+        contains: query
       }
     },
     select: {

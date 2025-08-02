@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docker:build": "./docker-build.sh",
+    "docker:run": "docker run -p 3000:3000 meo-stationery:latest",
+    "docker:compose": "docker-compose up -d",
+    "docker:down": "docker-compose down"
   },
   "prisma": {
     "seed": "ts-node ./prisma/seed.ts"
