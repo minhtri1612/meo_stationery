@@ -43,7 +43,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="absolute inset-0 bg-[url('/stationery-pattern.png')] opacity-10 mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-[url('/stationery-pattern.svg')] opacity-10 mix-blend-overlay"></div>
       </section>
 
       {/* New Arrivals */}

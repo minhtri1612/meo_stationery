@@ -79,11 +79,18 @@ export async function GET(request: Request) {
     take: take ? parseInt(take) : undefined
   });
 
+  // Serialize products to handle BigInt values
+  const serializedProducts = products.map(product => ({
+    ...product,
+    price: Number(product.price),
+    quantity: Number(product.quantity)
+  }));
+
   return NextResponse.json({
-    products,
+    products: serializedProducts,
     priceRange: {
-      min: priceStats[0]?.min || 0,
-      max: priceStats[0]?.max || 1000000
+      min: Number(priceStats[0]?.min) || 0,
+      max: Number(priceStats[0]?.max) || 1000000
     }
   });
 }
