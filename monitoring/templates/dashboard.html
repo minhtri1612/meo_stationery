@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meo Stationery - System Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-1px);
+        }
+        
+        .card h3 {
+            color: #4a5568;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.25rem;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.3rem;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        
+        .metric-label {
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        
+        .status-healthy { color: #48bb78; }
+        .status-warning { color: #ed8936; }
+        .status-critical { color: #f56565; }
+        .status-unhealthy { color: #f56565; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.25rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-normal { background-color: #48bb78; }
+        .progress-warning { background-color: #ed8936; }
+        .progress-critical { background-color: #f56565; }
+        
+        .chart-container {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 200px;
+        }
+        
+        .alerts-container {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .alert {
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.4rem;
+            border-left: 3px solid;
+            font-size: 0.9rem;
+        }
+        
+        .alert-warning {
+            background-color: #fef5e7;
+            border-color: #ed8936;
+            color: #744210;
+        }
+        
+        .alert-critical {
+            background-color: #fed7d7;
+            border-color: #f56565;
+            color: #742a2a;
+        }
+        
+        .docker-status {
+            padding: 0.5rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .docker-running {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .docker-stopped {
+            background-color: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .refresh-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: transform 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        
+        .refresh-button:hover {
+            transform: scale(1.02);
+        }
+        
+        .timestamp {
+            color: #718096;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏪 Meo Stationery - System Monitor</h1>
+        <p>Real-time monitoring dashboard for your application</p>
+    </div>
+    
+    <div class="container">
+        <button class="refresh-button" onclick="refreshData()">🔄 Refresh Data</button>
+        
+        <div class="grid">
+            <!-- System Resources -->
+            <div class="card">
+                <h3>💻 System Resources</h3>
+                <div class="metric">
+                    <span class="metric-label">CPU Usage</span>
+                    <span class="metric-value" id="cpu-usage">-</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="cpu-progress"></div>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Memory Usage</span>
+                    <span class="metric-value" id="memory-usage">-</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="memory-progress"></div>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Disk Usage</span>
+                    <span class="metric-value" id="disk-usage">-</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="disk-progress"></div>
+                </div>
+            </div>
+            
+            <!-- Application Status -->
+            <div class="card">
+                <h3>🚀 Application Status</h3>
+                <div class="metric">
+                    <span class="metric-label">Status</span>
+                    <span class="metric-value" id="app-status">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Response Time</span>
+                    <span class="metric-value" id="response-time">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Process Count</span>
+                    <span class="metric-value" id="process-count">-</span>
+                </div>
+            </div>
+            
+            <!-- Docker Status -->
+            <div class="card">
+                <h3>🐳 Docker Container</h3>
+                <div class="metric">
+                    <span class="metric-label">Container Status</span>
+                    <span class="metric-value" id="docker-status">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Image</span>
+                    <span class="metric-value" id="docker-image">-</span>
+                </div>
+                <div id="docker-details"></div>
+            </div>
+            
+            <!-- Network Stats -->
+            <div class="card">
+                <h3>🌐 Network Statistics</h3>
+                <div class="metric">
+                    <span class="metric-label">Bytes Sent</span>
+                    <span class="metric-value" id="network-sent">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Bytes Received</span>
+                    <span class="metric-value" id="network-recv">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Free Disk Space</span>
+                    <span class="metric-value" id="disk-free">-</span>
+                </div>
+            </div>
+            
+            <!-- Performance Chart -->
+            <div class="chart-container">
+                <h3>📈 Performance Trends (Last 2 Hours)</h3>
+                <canvas id="performanceChart" width="400" height="120"></canvas>
+            </div>
+            
+            <!-- Recent Alerts -->
+            <div class="alerts-container">
+                <h3>⚠️ Recent Alerts</h3>
+                <div id="alerts-list">
+                    <p>Loading alerts...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timestamp" id="last-updated">Last updated: -</div>
+    </div>
+    
+    <script>
+        let performanceChart;
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function formatNumber(num) {
+            return new Intl.NumberFormat().format(num);
+        }
+        
+        function getProgressClass(value, warningThreshold = 70, criticalThreshold = 85) {
+            if (value >= criticalThreshold) return 'progress-critical';
+            if (value >= warningThreshold) return 'progress-warning';
+            return 'progress-normal';
+        }
+        
+        function getStatusClass(status) {
+            if (status === 'healthy') return 'status-healthy';
+            if (status.includes('unhealthy') || status === 'unreachable') return 'status-critical';
+            return 'status-warning';
+        }
+        
+        function updateMetrics(data) {
+            // CPU
+            document.getElementById('cpu-usage').textContent = `${data.cpu_percent.toFixed(1)}%`;
+            const cpuProgress = document.getElementById('cpu-progress');
+            cpuProgress.style.width = `${data.cpu_percent}%`;
+            cpuProgress.className = 'progress-fill ' + getProgressClass(data.cpu_percent);
+            
+            // Memory
+            document.getElementById('memory-usage').textContent = 
+                `${data.memory_percent.toFixed(1)}% (${data.memory_used.toFixed(1)}GB)`;
+            const memoryProgress = document.getElementById('memory-progress');
+            memoryProgress.style.width = `${data.memory_percent}%`;
+            memoryProgress.className = 'progress-fill ' + getProgressClass(data.memory_percent);
+            
+            // Disk
+            document.getElementById('disk-usage').textContent = `${data.disk_usage.toFixed(1)}%`;
+            const diskProgress = document.getElementById('disk-progress');
+            diskProgress.style.width = `${data.disk_usage}%`;
+            diskProgress.className = 'progress-fill ' + getProgressClass(data.disk_usage, 80, 90);
+            
+            // Application
+            const appStatus = document.getElementById('app-status');
+            appStatus.textContent = data.app_status;
+            appStatus.className = 'metric-value ' + getStatusClass(data.app_status);
+            
+            document.getElementById('response-time').textContent = 
+                data.app_response_time ? `${(data.app_response_time * 1000).toFixed(0)}ms` : 'N/A';
+            document.getElementById('process-count').textContent = formatNumber(data.process_count);
+            
+            // Network
+            document.getElementById('network-sent').textContent = formatBytes(data.network_sent);
+            document.getElementById('network-recv').textContent = formatBytes(data.network_recv);
+            document.getElementById('disk-free').textContent = `${data.disk_free.toFixed(1)}GB`;
+            
+            // Timestamp
+            document.getElementById('last-updated').textContent = 
+                `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+        }
+        
+        function updateDockerStatus(data) {
+            const statusElement = document.getElementById('docker-status');
+            const imageElement = document.getElementById('docker-image');
+            const detailsElement = document.getElementById('docker-details');
+            
+            if (data.status === 'running') {
+                statusElement.textContent = 'Running';
+                statusElement.className = 'metric-value status-healthy';
+            } else {
+                statusElement.textContent = data.status || 'Unknown';
+                statusElement.className = 'metric-value status-critical';
+            }
+            
+            imageElement.textContent = data.image || 'N/A';
+            
+            if (data.created) {
+                detailsElement.innerHTML = `
+                    <div class="docker-status ${data.status === 'running' ? 'docker-running' : 'docker-stopped'}">
+                        Created: ${new Date(data.created).toLocaleString()}
+                    </div>
+                `;
+            }
+        }
+        
+        function updateAlerts(alerts) {
+            const alertsList = document.getElementById('alerts-list');
+            
+            if (alerts.length === 0) {
+                alertsList.innerHTML = '<p style="color: #48bb78; font-weight: bold;">✅ No recent alerts</p>';
+                return;
+            }
+            
+            alertsList.innerHTML = alerts.slice(0, 10).map(alert => `
+                <div class="alert alert-${alert.severity}">
+                    <strong>${alert.alert_type}</strong>: ${alert.message}
+                    <br><small>${new Date(alert.timestamp).toLocaleString()}</small>
+                </div>
+            `).join('');
+        }
+        
+        function initChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'CPU %',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                        tension: 0.1
+                    }, {
+                        label: 'Memory %',
+                        data: [],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateChart(history) {
+            if (!performanceChart || history.length === 0) return;
+            
+            const last20 = history.slice(0, 20).reverse();
+            
+            performanceChart.data.labels = last20.map(item => 
+                new Date(item.timestamp).toLocaleTimeString()
+            );
+            performanceChart.data.datasets[0].data = last20.map(item => item.cpu_percent);
+            performanceChart.data.datasets[1].data = last20.map(item => item.memory_percent);
+            
+            performanceChart.update();
+        }
+        
+        async function fetchData() {
+            try {
+                // Fetch current metrics
+                const metricsResponse = await fetch('/api/metrics/current');
+                const metrics = await metricsResponse.json();
+                updateMetrics(metrics);
+                
+                // Fetch Docker status
+                const dockerResponse = await fetch('/api/docker/status');
+                const dockerData = await dockerResponse.json();
+                updateDockerStatus(dockerData);
+                
+                // Fetch alerts
+                const alertsResponse = await fetch('/api/alerts');
+                const alerts = await alertsResponse.json();
+                updateAlerts(alerts);
+                
+                // Fetch history for chart
+                const historyResponse = await fetch('/api/metrics/history?hours=2');
+                const history = await historyResponse.json();
+                updateChart(history);
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('last-updated').textContent = 'Error loading data';
+            }
+        }
+        
+        function refreshData() {
+            fetchData();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initChart();
+            fetchData();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(fetchData, 30000);
+        });
+    </script>
+</body>
+</html>

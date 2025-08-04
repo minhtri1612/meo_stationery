@@ -19,6 +19,40 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - meo-network
+
+  meo-monitor:
+    build: ./monitoring
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - MEO_APP_URL=http://meo-stationery:3000
+    volumes:
+      # Mount Docker socket for container monitoring
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Persist monitoring database
+      - monitor_data:/app/data
+      # Mount host system for system monitoring
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+    restart: unless-stopped
+    depends_on:
+      - meo-stationery
+    networks:
+      - meo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   sqlite_data:
+  monitor_data:
+
+networks:
+  meo-network:
+    driver: bridge
