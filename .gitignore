@@ -6,3 +6,15 @@
 .env.local
 natehigger
 /.next/
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfvars
+terraform/*.tfplan
+
+# AWS credentials
+*.pem
+.aws/
