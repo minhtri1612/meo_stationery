@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Meo Stationery Flask{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-primary text-white p-5 rounded mb-5">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-4">🖊️ Meo Stationery Flask Backend</h1>
+            <p class="lead">Backend API and admin panel for your stationery e-commerce platform.</p>
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('products') }}" class="btn btn-light btn-lg">View Products</a>
+                <a href="/api/health" class="btn btn-outline-light btn-lg">API Health</a>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <i class="fas fa-server fa-8x"></i>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-boxes fa-3x text-primary mb-3"></i>
+                <h5>Product Management</h5>
+                <p>Manage your stationery inventory with full CRUD operations.</p>
+                <a href="{{ url_for('products') }}" class="btn btn-primary">View Products</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-users fa-3x text-success mb-3"></i>
+                <h5>User Management</h5>
+                <p>Handle customer registration, authentication, and profiles.</p>
+                {% if session.user_id %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-success">Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-success">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-bar fa-3x text-warning mb-3"></i>
+                <h5>Analytics & Reports</h5>
+                <p>Track orders, sales, and business performance metrics.</p>
+                <a href="/api/stats" class="btn btn-warning">View Stats</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="text-center mb-4">Featured Products</h2>
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description }}</p>
+                <p class="card-text"><strong>${{ "%.2f"|format(product.price) }}</strong></p>
+                <span class="badge bg-secondary">{{ product.category }}</span>
+                {% if product.stock > 0 %}
+                    <span class="badge bg-success">In Stock ({{ product.stock }})</span>
+                {% else %}
+                    <span class="badge bg-danger">Out of Stock</span>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-primary btn-sm">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if products|length == 0 %}
+<div class="alert alert-info text-center">
+    <h4>🚀 Getting Started</h4>
+    <p>Your Flask backend is running! Sample products will be created automatically.</p>
+    <p>Admin login: <strong>username: admin</strong> | <strong>password: admin123</strong></p>
+</div>
+{% endif %}
+
+<div class="text-center mt-5">
+    <a href="{{ url_for('products') }}" class="btn btn-outline-primary btn-lg">View All Products</a>
+</div>
+{% endblock %}

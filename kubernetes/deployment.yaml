@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meo-stationery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meo-stationery
+  template:
+    metadata:
+      labels:
+        app: meo-stationery
+    spec:
+      containers:
+        - name: meo-stationery
+          image: 675613596870.dkr.ecr.ap-southeast-2.amazonaws.com/meo_stationery-meo-stationery:latest
+          ports:
+            - containerPort: 3000
