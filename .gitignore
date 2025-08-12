@@ -34,3 +34,4 @@ terraform_eks/*.tfplan
 # AWS credentials
 *.pem
 .aws/
+.terraform/
